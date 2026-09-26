@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#080b14" />
+  <title>LexAI — Your GenAI Legal Assistant</title>
+  <meta name="description" content="LexAI makes legal information accessible to everyone. Simplify documents, compare contracts, analyze risks, and get AI-powered legal guidance — instantly." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><rect width='28' height='28' rx='8' fill='%236366f1'/><path d='M7 20L14 8L21 20' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M9.5 16H18.5' stroke='white' stroke-width='2.2' stroke-linecap='round'/><circle cx='14' cy='22' r='1.5' fill='white'/></svg>" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ─── HEADER ───────────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect width="28" height="28" rx="8" fill="url(#logoGrad)"/>
+            <path d="M7 20L14 8L21 20" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9.5 16H18.5" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+            <circle cx="14" cy="22" r="1.5" fill="white"/>
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28">
+                <stop stop-color="#6366f1"/>
+                <stop offset="1" stop-color="#8b5cf6"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-name">LexAI</span>
+          <span class="logo-tagline">Legal Intelligence</span>
+        </div>
+      </div>
+
+      <nav class="tab-nav" id="tabNav" role="tablist">
+        <button class="tab-btn active" data-tab="simplify" role="tab" id="tab-simplify" aria-selected="true">
+          <i data-lucide="file-text"></i>
+          <span>Simplify</span>
+        </button>
+        <button class="tab-btn" data-tab="compare" role="tab" id="tab-compare" aria-selected="false">
+          <i data-lucide="git-compare"></i>
+          <span>Compare</span>
+        </button>
+        <button class="tab-btn" data-tab="qa" role="tab" id="tab-qa" aria-selected="false">
+          <i data-lucide="message-square"></i>
+          <span>Ask AI</span>
+        </button>
+        <button class="tab-btn" data-tab="clauses" role="tab" id="tab-clauses" aria-selected="false">
+          <i data-lucide="shield-alert"></i>
+          <span>Risk Scan</span>
+        </button>
+        <button class="tab-btn" data-tab="checklist" role="tab" id="tab-checklist" aria-selected="false">
+          <i data-lucide="list-checks"></i>
+          <span>Checklist</span>
+        </button>
+        <button class="tab-btn" data-tab="prepare" role="tab" id="tab-prepare" aria-selected="false">
+          <i data-lucide="briefcase"></i>
+          <span>Lawyer Prep</span>
+        </button>
+      </nav>
+
+      <div class="header-actions">
+        <button class="status-chip demo" id="headerStatusChip" title="Click to view API & Demo settings">
+          <span class="status-pulse"></span>
+          <span id="headerStatusText">Demo Mode Active</span>
+        </button>
+        <button class="icon-btn" id="helpBtn" title="Capabilities & Architecture" aria-label="About LexAI">
+          <i data-lucide="help-circle"></i>
+        </button>
+        <button class="icon-btn" id="settingsBtn" title="API Settings" aria-label="Open settings">
+          <i data-lucide="settings"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── MAIN CONTENT ─────────────────────────────────────────── -->
+  <main class="app-main">
+
+    <!-- HERO BANNER (shown when no API key) -->
+    <div class="hero-banner" id="heroBanner">
+      <button class="hero-dismiss-btn" id="heroDismissBtn" title="Dismiss banner" aria-label="Dismiss banner">
+        <i data-lucide="x"></i>
+      </button>
+      <div class="hero-particles" aria-hidden="true">
+        <div class="particle p1"></div><div class="particle p2"></div>
+        <div class="particle p3"></div><div class="particle p4"></div>
+        <div class="particle p5"></div><div class="particle p6"></div>
+      </div>
+      <div class="hero-content">
+        <div class="hero-badge">✦ Powered by Google Gemini</div>
+        <h1 class="hero-title">Legal Knowledge,<br /><span class="gradient-text">Simplified.</span></h1>
+        <p class="hero-subtitle">Upload any legal document and let AI explain it in plain English. Analyze risks, compare contracts, get actionable checklists, and prepare for your lawyer — all in one place.</p>
+        <div class="hero-actions-row" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:16px;">
+          <button class="cta-btn" id="heroCtaBtn">
+            <i data-lucide="key"></i>
+            Enter Gemini API Key
+          </button>
+          <button class="cta-btn-secondary" id="heroDemoBtn">
+            <i data-lucide="sparkles"></i>
+            Try Interactive Demo
+          </button>
+        </div>
+        <p class="hero-disclaimer">🔒 Your API key is stored locally and never sent to our servers.</p>
+      </div>
+    </div>
+
+    <!-- TAB PANELS -->
+    <div class="tab-panels" id="tabPanels">
+
+      <!-- ── Tab 1: Simplify ────────────────────────────────────── -->
+      <section class="tab-panel active" id="panel-simplify" role="tabpanel" aria-labelledby="tab-simplify">
+        <div class="panel-layout">
+          <div class="panel-sidebar">
+            <div class="panel-header">
+              <div class="panel-icon indigo"><i data-lucide="file-text"></i></div>
+              <div>
+                <h2 class="panel-title">Document Simplifier</h2>
+                <p class="panel-desc">Turn complex legal language into plain English instantly.</p>
+              </div>
+            </div>
+
+            <div class="input-section">
+              <div class="upload-zone" id="simplify-upload-zone" data-feature="simplify">
+                <i data-lucide="upload-cloud"></i>
+                <p>Drop a PDF here or <span class="upload-link">browse</span></p>
+                <span class="upload-hint">Supports PDF & plain text</span>
+                <input type="file" id="simplify-file-input" accept=".pdf,.txt" class="file-input-hidden" />
+              </div>
+              <div class="divider"><span>or paste text</span></div>
+              <textarea class="text-input" id="simplify-text-input" placeholder="Paste your legal document text here..." rows="8"></textarea>
+              <div class="sample-bar">
+                <span class="sample-label">⚡ Try Samples:</span>
+                <button type="button" class="sample-pill" data-sample="nda">Mutual NDA</button>
+                <button type="button" class="sample-pill" data-sample="lease">Apartment Lease</button>
+                <button type="button" class="sample-pill" data-sample="consulting">High-Risk Contractor</button>
+              </div>
+            </div>
+
+            <div class="option-group">
+              <label class="option-label">Reading Level</label>
+              <div class="pill-group" id="simplify-level-group">
+                <button class="pill" data-value="elementary">5th Grade</button>
+                <button class="pill active" data-value="general">General Adult</button>
+                <button class="pill" data-value="professional">Semi-Technical</button>
+              </div>
+            </div>
+
+            <button class="action-btn" id="simplify-run-btn">
+              <i data-lucide="wand-2"></i>
+              Simplify Document
+            </button>
+          </div>
+
+          <div class="panel-output" id="simplify-output">
+            <div class="output-placeholder">
+              <i data-lucide="sparkles"></i>
+              <p>Your simplified document will appear here</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Tab 2: Compare ─────────────────────────────────────── -->
+      <section class="tab-panel" id="panel-compare" role="tabpanel" aria-labelledby="tab-compare">
+        <div class="panel-layout">
+          <div class="panel-sidebar">
+            <div class="panel-header">
+              <div class="panel-icon violet"><i data-lucide="git-compare"></i></div>
+              <div>
+                <h2 class="panel-title">Contract Comparator</h2>
+                <p class="panel-desc">Spot differences, risks, and inconsistencies between two documents.</p>
+              </div>
+            </div>
+
+            <div class="compare-inputs">
+              <div class="compare-input-group">
+                <label class="compare-label">Document A</label>
+                <div class="upload-zone mini" id="compare-upload-a" data-feature="compare-a">
+                  <i data-lucide="file-plus"></i>
+                  <p>Upload or <span class="upload-link">browse</span></p>
+                  <input type="file" id="compare-file-a" accept=".pdf,.txt" class="file-input-hidden" />
+                </div>
+                <textarea class="text-input small" id="compare-text-a" placeholder="Paste Document A..." rows="5"></textarea>
+              </div>
+              <div class="compare-vs"><span>VS</span></div>
+              <div class="compare-input-group">
+                <label class="compare-label">Document B</label>
+                <div class="upload-zone mini" id="compare-upload-b" data-feature="compare-b">
+                  <i data-lucide="file-plus"></i>
+                  <p>Upload or <span class="upload-link">browse</span></p>
+                  <input type="file" id="compare-file-b" accept=".pdf,.txt" class="file-input-hidden" />
+                </div>
+                <textarea class="text-input small" id="compare-text-b" placeholder="Paste Document B..." rows="5"></textarea>
+              </div>
+            </div>
+
+            <div class="sample-bar" style="margin-bottom:12px; flex-wrap:wrap;">
+              <span class="sample-label">⚡ Quick Compare:</span>
+              <button type="button" class="sample-pill" id="compare-sample-btn">NDA: Balanced vs. Strict</button>
+              <button type="button" class="sample-pill" id="compare-sample-lease">Lease: Standard vs Strict</button>
+              <button type="button" class="sample-pill" id="compare-sample-contractor">Contractor: Fair vs High-Risk</button>
+            </div>
+
+            <button class="action-btn violet" id="compare-run-btn">
+              <i data-lucide="git-compare"></i>
+              Compare Documents
+            </button>
+          </div>
+
+          <div class="panel-output" id="compare-output">
+            <div class="output-placeholder">
+              <i data-lucide="git-compare"></i>
+              <p>Comparison analysis will appear here</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Tab 3: Q&A Chat ────────────────────────────────────── -->
+      <section class="tab-panel" id="panel-qa" role="tabpanel" aria-labelledby="tab-qa">
+        <div class="qa-layout">
+          <div class="qa-sidebar">
+            <div class="panel-header">
+              <div class="panel-icon emerald"><i data-lucide="message-square"></i></div>
+              <div>
+                <h2 class="panel-title">Legal Q&A</h2>
+                <p class="panel-desc">Ask anything about your document.</p>
+              </div>
+            </div>
+            <div class="upload-zone mini" id="qa-upload-zone" data-feature="qa">
+              <i data-lucide="paperclip"></i>
+              <p>Attach document <span class="upload-link">(optional)</span></p>
+              <input type="file" id="qa-file-input" accept=".pdf,.txt" class="file-input-hidden" />
+            </div>
+            <div id="qa-doc-status" class="doc-status hidden">
+              <i data-lucide="check-circle"></i>
+              <span id="qa-doc-name">Document loaded</span>
+              <button class="icon-btn-sm" id="qa-clear-doc" title="Remove document"><i data-lucide="x"></i></button>
+            </div>
+            <div class="sample-bar" style="margin: 8px 0 12px 0; flex-wrap:wrap;">
+              <span class="sample-label">⚡ Context:</span>
+              <button type="button" class="sample-pill" id="qa-sample-btn">Sample NDA</button>
+              <button type="button" class="sample-pill" id="qa-sample-lease">Sample Lease</button>
+              <button type="button" class="sample-pill" id="qa-sample-contractor">Sample Contractor</button>
+            </div>
+            <div class="qa-suggestions">
+              <p class="suggestions-label">Quick questions:</p>
+              <button class="suggestion-chip" data-q="What are my main obligations under this document?">Main obligations</button>
+              <button class="suggestion-chip" data-q="What are the key deadlines or dates mentioned?">Key dates</button>
+              <button class="suggestion-chip" data-q="What happens if either party breaches this agreement?">Breach clauses</button>
+              <button class="suggestion-chip" data-q="Are there any unusual or potentially risky clauses?">Risk clauses</button>
+              <button class="suggestion-chip" data-q="How can I terminate this agreement?">Termination</button>
+            </div>
+            <button class="action-btn-ghost" id="qa-clear-btn">
+              <i data-lucide="trash-2"></i> Clear conversation
+            </button>
+          </div>
+
+          <div class="qa-chat-area">
+            <div class="chat-messages" id="chat-messages">
+              <div class="chat-welcome">
+                <div class="welcome-icon"><i data-lucide="bot"></i></div>
+                <h3>Hello! I'm your legal AI assistant.</h3>
+                <p>Upload a document or just ask me anything about legal topics. I'll provide information to help you understand — not replace professional legal advice.</p>
+              </div>
+            </div>
+            <div class="chat-input-bar">
+              <textarea class="chat-input" id="chat-input" placeholder="Ask a question about your document..." rows="1"></textarea>
+              <button class="send-btn" id="chat-send-btn" aria-label="Send message">
+                <i data-lucide="send"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Tab 4: Clause Risk Analyzer ───────────────────────── -->
+      <section class="tab-panel" id="panel-clauses" role="tabpanel" aria-labelledby="tab-clauses">
+        <div class="panel-layout">
+          <div class="panel-sidebar">
+            <div class="panel-header">
+              <div class="panel-icon amber"><i data-lucide="shield-alert"></i></div>
+              <div>
+                <h2 class="panel-title">Risk Scanner</h2>
+                <p class="panel-desc">Identify and assess risky clauses in any legal document.</p>
+              </div>
+            </div>
+
+            <div class="upload-zone" id="clauses-upload-zone" data-feature="clauses">
+              <i data-lucide="upload-cloud"></i>
+              <p>Drop a PDF here or <span class="upload-link">browse</span></p>
+              <input type="file" id="clauses-file-input" accept=".pdf,.txt" class="file-input-hidden" />
+            </div>
+            <div class="divider"><span>or paste text</span></div>
+            <textarea class="text-input" id="clauses-text-input" placeholder="Paste your document text here..." rows="7"></textarea>
+            <div class="sample-bar" style="flex-wrap:wrap;">
+              <span class="sample-label">⚡ Try Samples:</span>
+              <button type="button" class="sample-pill" data-sample="consulting">High-Risk Contractor</button>
+              <button type="button" class="sample-pill" data-sample="lease">Apartment Lease</button>
+              <button type="button" class="sample-pill" data-sample="nda">Mutual NDA</button>
+            </div>
+
+            <button class="action-btn amber" id="clauses-run-btn">
+              <i data-lucide="scan-search"></i>
+              Scan for Risks
+            </button>
+          </div>
+
+          <div class="panel-output" id="clauses-output">
+            <div class="output-placeholder">
+              <i data-lucide="shield"></i>
+              <p>Risk analysis will appear here</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Tab 5: Checklist ───────────────────────────────────── -->
+      <section class="tab-panel" id="panel-checklist" role="tabpanel" aria-labelledby="tab-checklist">
+        <div class="panel-layout">
+          <div class="panel-sidebar">
+            <div class="panel-header">
+              <div class="panel-icon teal"><i data-lucide="list-checks"></i></div>
+              <div>
+                <h2 class="panel-title">Action Checklist</h2>
+                <p class="panel-desc">Generate prioritized next steps for your legal situation.</p>
+              </div>
+            </div>
+
+            <div class="upload-zone" id="checklist-upload-zone" data-feature="checklist">
+              <i data-lucide="upload-cloud"></i>
+              <p>Upload document <span class="upload-link">(optional)</span></p>
+              <input type="file" id="checklist-file-input" accept=".pdf,.txt" class="file-input-hidden" />
+            </div>
+
+            <div class="divider"><span>describe your situation</span></div>
+            <textarea class="text-input" id="checklist-situation" placeholder="e.g. I received a contract from my employer for a new job. I need to know what to do before signing it..." rows="3"></textarea>
+            <div class="sample-bar" style="flex-wrap:wrap;">
+              <span class="sample-label">⚡ Scenarios:</span>
+              <button type="button" class="sample-pill" id="checklist-sample-btn">Deposit Dispute</button>
+              <button type="button" class="sample-pill" id="checklist-sample-lease">Signing Lease</button>
+              <button type="button" class="sample-pill" id="checklist-sample-contractor">Unpaid Freelance Work</button>
+            </div>
+
+            <button class="action-btn teal" id="checklist-run-btn">
+              <i data-lucide="list-checks"></i>
+              Generate Checklist
+            </button>
+          </div>
+
+          <div class="panel-output" id="checklist-output">
+            <div class="output-placeholder">
+              <i data-lucide="list-checks"></i>
+              <p>Your action checklist will appear here</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Tab 6: Lawyer Prep ─────────────────────────────────── -->
+      <section class="tab-panel" id="panel-prepare" role="tabpanel" aria-labelledby="tab-prepare">
+        <div class="panel-layout">
+          <div class="panel-sidebar">
+            <div class="panel-header">
+              <div class="panel-icon rose"><i data-lucide="briefcase"></i></div>
+              <div>
+                <h2 class="panel-title">Lawyer Prep</h2>
+                <p class="panel-desc">Get AI-curated questions to ask your lawyer.</p>
+              </div>
+            </div>
+
+            <div class="upload-zone" id="prepare-upload-zone" data-feature="prepare">
+              <i data-lucide="upload-cloud"></i>
+              <p>Upload relevant document <span class="upload-link">(optional)</span></p>
+              <input type="file" id="prepare-file-input" accept=".pdf,.txt" class="file-input-hidden" />
+            </div>
+
+            <div class="divider"><span>describe your situation</span></div>
+            <textarea class="text-input" id="prepare-situation" placeholder="e.g. I'm a freelance developer and a client hasn't paid me for 3 months of work. I have a signed contract and email evidence. I want to consult a lawyer..." rows="3"></textarea>
+            <div class="sample-bar" style="flex-wrap:wrap;">
+              <span class="sample-label">⚡ Scenarios:</span>
+              <button type="button" class="sample-pill" id="prepare-sample-btn">Unpaid Invoices</button>
+              <button type="button" class="sample-pill" id="prepare-sample-eviction">Eviction Notice</button>
+              <button type="button" class="sample-pill" id="prepare-sample-noncompete">Non-Compete Dispute</button>
+            </div>
+
+            <div class="option-group">
+              <label class="option-label">Legal Area</label>
+              <div class="pill-group" id="prepare-area-group">
+                <button class="pill active" data-value="general">General</button>
+                <button class="pill" data-value="contract">Contract</button>
+                <button class="pill" data-value="employment">Employment</button>
+                <button class="pill" data-value="property">Property</button>
+                <button class="pill" data-value="family">Family</button>
+                <button class="pill" data-value="business">Business</button>
+              </div>
+            </div>
+
+            <button class="action-btn rose" id="prepare-run-btn">
+              <i data-lucide="briefcase"></i>
+              Generate Questions
+            </button>
+          </div>
+
+          <div class="panel-output" id="prepare-output">
+            <div class="output-placeholder">
+              <i data-lucide="help-circle"></i>
+              <p>Your lawyer prep questions will appear here</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /tab-panels -->
+  </main>
+
+  <!-- ─── SETTINGS MODAL ────────────────────────────────────────── -->
+  <div class="modal-overlay" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="settings-title"><i data-lucide="key"></i> API Settings</h3>
+        <button class="icon-btn" id="closeSettings" aria-label="Close settings"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="api-key-input">Google Gemini API Key</label>
+          <div class="api-key-row">
+            <input type="password" class="form-input" id="api-key-input" placeholder="AIza..." autocomplete="off" />
+            <button class="icon-btn" id="toggleApiKey" title="Show/hide key" aria-label="Toggle key visibility">
+              <i data-lucide="eye"></i>
+            </button>
+          </div>
+          <p class="form-hint">
+            Get your free API key from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.
+            Your key is stored only in your browser's localStorage.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="model-select">Gemini Model</label>
+          <select class="form-select" id="model-select">
+            <option value="gemini-2.0-flash">Gemini 2.0 Flash (Recommended — Fast)</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro (Slower, more thorough)</option>
+          </select>
+        </div>
+
+        <div class="api-status" id="api-status">
+          <div class="status-dot" id="status-dot"></div>
+          <span id="status-text">No API key configured</span>
+        </div>
+
+        <div class="form-group" style="padding-top:12px; border-top:1px solid var(--border); margin-top:8px;">
+          <label class="form-label">No API Key? Try Demo Mode</label>
+          <p class="form-hint" style="margin-bottom:10px;">
+            Test the entire LexAI suite with realistic simulated GenAI responses, streaming, and sample documents.
+          </p>
+          <button type="button" class="action-btn-ghost" id="enableDemoBtn" style="width:100%; justify-content:center;">
+            <i data-lucide="sparkles"></i>
+            Activate Demo Mode
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn-ghost" id="cancelSettings">Cancel</button>
+        <button class="action-btn" id="saveSettings">
+          <i data-lucide="save"></i>
+          Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ABOUT / CAPABILITIES MODAL ────────────────────────────── -->
+  <div class="modal-overlay" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="modal" style="max-width: 560px;">
+      <div class="modal-header">
+        <h3 id="help-title"><i data-lucide="sparkles"></i> About LexAI</h3>
+        <button class="icon-btn" id="closeHelp" aria-label="Close modal"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body" style="gap:16px;">
+        <p style="font-size:0.86rem; color:var(--text-secondary); line-height:1.6;">
+          <strong>LexAI</strong> is a client-side legal intelligence suite powered by <strong>Google Gemini</strong>. It empowers everyday individuals and businesses to demystify contracts and prepare strategic questions before spending thousands on billable attorney hours.
+        </p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div style="padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px;">
+            <div style="font-weight:700; font-size:0.82rem; color:var(--primary-light); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+              <i data-lucide="file-text" style="width:14px; height:14px;"></i> Simplify
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Plain English translation with customizable reading levels.</div>
+          </div>
+          <div style="padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px;">
+            <div style="font-weight:700; font-size:0.82rem; color:#a78bfa; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+              <i data-lucide="git-compare" style="width:14px; height:14px;"></i> Compare
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Side-by-side visual diffing, risk scores (1-10), and recommendations.</div>
+          </div>
+          <div style="padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px;">
+            <div style="font-weight:700; font-size:0.82rem; color:var(--emerald); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+              <i data-lucide="message-square" style="width:14px; height:14px;"></i> Ask AI
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Conversational legal assistant with grounded document context.</div>
+          </div>
+          <div style="padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px;">
+            <div style="font-weight:700; font-size:0.82rem; color:var(--amber); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+              <i data-lucide="shield-alert" style="width:14px; height:14px;"></i> Risk Scan
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Categorizes high/med/low risk clauses, inconsistencies, and obligations.</div>
+          </div>
+          <div style="padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px;">
+            <div style="font-weight:700; font-size:0.82rem; color:var(--teal); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+              <i data-lucide="list-checks" style="width:14px; height:14px;"></i> Checklist
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Prioritized action steps with urgency tags and interactive tracking.</div>
+          </div>
+          <div style="padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px;">
+            <div style="font-weight:700; font-size:0.82rem; color:var(--rose); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+              <i data-lucide="briefcase" style="width:14px; height:14px;"></i> Lawyer Prep
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Generates strategic questions and briefs to maximize consultation value.</div>
+          </div>
+        </div>
+
+        <div style="padding:10px 14px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:8px; font-size:0.78rem; color:#34d399; line-height:1.5;">
+          🔒 <strong>Zero Server Telemetry</strong>: PDF text extraction occurs entirely inside your browser via WebAssembly/PDF.js. No documents or API keys are ever stored on or transmitted through any third-party server.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn" id="closeHelpBtn" style="width:100%; justify-content:center;">
+          Got it
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TOAST NOTIFICATION ───────────────────────────────────── -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- ─── SCRIPTS ──────────────────────────────────────────────── -->
+  <!-- Google Generative AI SDK via importmap -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+  </script>
+
+  <!-- LexAI Application -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>
